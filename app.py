@@ -7,6 +7,7 @@ from langgraph.prebuilt import ToolNode
 from langgraph.graph import StateGraph
 from langgraph.prebuilt import tools_condition
 import gradio as gr
+from langchain_core.messages import SystemMessage
 from langgraph.graph.message import add_messages
 
 load_dotenv()
@@ -70,15 +71,35 @@ graph = builder.compile()
 
 def chat(message, history):
 
-    result = graph.invoke(
-        {
-            "messages": [
-                ("user", message)
-            ]
-        }
+    system_prompt = SystemMessage(
+        content="""
+You are a Student Database Agent.
+
+You help users retrieve and analyze student information stored in a PostgreSQL database.
+
+Available capabilities:
+1. Retrieve information about a specific student using student ID.
+2. Find the top-performing student.
+3. List students scoring above a specified mark.
+4. List students with attendance below a specified threshold.
+5. Count the total number of students.
+
+Rules:
+- Use tools whenever database information is required.
+- Never invent student data.
+- If a question can be answered without tools, answer directly.
+- If the user asks about your capabilities, explain them.
+- If a requested capability is unavailable, politely mention that it is not yet implemented.
+"""
     )
 
-    return result["messages"][-1].content
+    response = llm_with_tools.invoke(
+        [system_prompt] + state["messages"]
+    )
+
+    return {
+        "messages": [response]
+    }
 
 demo = gr.ChatInterface(
     fn=chat,

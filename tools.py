@@ -149,57 +149,6 @@ def get_students_above_marks(min_marks: int):
 @tool
 def get_low_attendance_students(max_attendance: int):
     """
-    Retrieve students whose attendance is below the specified percentage.
-
-    Use this tool when the user asks questions such as:
-    - Show students with attendance below 75%
-    - Who has low attendance?
-    - List students with poor attendance
-    - Students below 80% attendance
-    - Show attendance defaulters
-
-    Args:
-        max_attendance: Attendance threshold percentage.
-
-    Returns:
-        A list of students whose attendance is below the specified value,
-        including student ID, name, marks, and attendance.
-    """
-
-    conn = get_connection()
-    cur = conn.cursor()
-
-    cur.execute(
-        """
-        SELECT *
-        FROM students
-        WHERE attendance < %s
-        ORDER BY attendance ASC
-        """,
-        (max_attendance,)
-    )
-
-    results = cur.fetchall()
-
-    cur.close()
-    conn.close()
-
-    if not results:
-        return f"No students found with attendance below {max_attendance}%."
-
-    return [
-        {
-            "student_id": row[0],
-            "name": row[1],
-            "marks": row[2],
-            "attendance": row[3]
-        }
-        for row in results
-    ]
-
-@tool
-def get_low_attendance_students(max_attendance: int):
-    """
     Retrieve students whose attendance is below a specified percentage.
 
     Use this tool when the user asks:
